@@ -4,6 +4,7 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { errorHandler } from './middlewares/errorHandler';
 import authRoutes from './routes/auth.routes';
+import myBooksRoutes from './routes/myBooks.routes';
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/me/books', myBooksRoutes);
 
 app.use(errorHandler);
 

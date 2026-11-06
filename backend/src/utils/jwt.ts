@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
-import { Role } from '@prisma/client';
+
+export type UserRole = 'USER' | 'ADMIN';
 
 export interface JwtPayload {
   userId: string;
-  role: Role;
+  role: UserRole;
 }
 
 const getJwtSecret = (): string => {
