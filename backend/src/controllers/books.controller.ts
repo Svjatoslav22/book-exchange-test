@@ -8,6 +8,7 @@ const getBooksQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(12),
   search: z.string().trim().max(100).optional(),
+  sort: z.enum(['newest', 'title-asc', 'title-desc']).default('newest'),
 });
 
 export const getBooks = async (
@@ -16,7 +17,7 @@ export const getBooks = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { page, limit, search } = getBooksQuerySchema.parse(req.query);
+    const { page, limit, search, sort } = getBooksQuerySchema.parse(req.query);
 
     const where: Prisma.BookWhereInput = search
       ? {
@@ -27,10 +28,17 @@ export const getBooks = async (
         }
       : {};
 
+    const orderBy: Prisma.BookOrderByWithRelationInput =
+      sort === 'title-asc'
+        ? { title: 'asc' }
+        : sort === 'title-desc'
+          ? { title: 'desc' }
+          : { createdAt: 'desc' };
+
     const [books, total] = await prisma.$transaction([
       prisma.book.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         skip: (page - 1) * limit,
         take: limit,
         include: { owner: { select: { id: true, name: true } } },

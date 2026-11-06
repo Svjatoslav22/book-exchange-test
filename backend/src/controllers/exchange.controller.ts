@@ -35,18 +35,35 @@ export const requestExchange = async (
 
     const requester = await prisma.user.findUnique({
       where: { id: req.user.userId },
-      select: { name: true, email: true },
+      select: {
+        name: true,
+        email: true,
+        books: {
+          select: { title: true, author: true },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
     });
 
     if (!requester) {
       throw new AppError('Користувача не знайдено', 404);
     }
 
+    const booksListText =
+      requester.books.length > 0
+        ? requester.books
+            .map((item, idx) => `${idx + 1}. «${item.title}» — ${item.author}`)
+            .join('\n')
+        : 'У відправника наразі немає доданих книг у профілі.';
+
     const text = [
       `Привіт, ${book.owner.name}!`,
       '',
       `Користувач ${requester.name} (${requester.email}) хоче обмінятися з вами книгою «${book.title}» (${book.author}).`,
-      message ? `\nПовідомлення: ${message}` : '',
+      '',
+      'Книги відправника, доступні для обміну:',
+      booksListText,
+      message ? `\nПовідомлення від ${requester.name}: ${message}` : '',
       '',
       'Відповісти можна безпосередньо на цей лист.',
     ].join('\n');
