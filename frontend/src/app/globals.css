@@ -1,38 +1,33 @@
 @import "tailwindcss";
 
+@theme {
+  --color-cream: #fdfbf7;
+  --color-burgundy: #701a39;
+  --color-burgundy-hover: #5b152e;
+  --color-burgundy-light: #9e2a55;
+}
+
 :root {
   color-scheme: light;
-  --background: #f9fafb;
-  --foreground: #111827;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #fdfbf7;
+  color: #1e293b;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: #111827 !important;
-}
-
-label {
-  color: #111827;
+.book-card:hover img {
+  transform: scale(1.03);
 }
 
 input,
 textarea,
 select {
-  color: #111827 !important;
-  background-color: #ffffff !important;
+  color: #0f172a;
+  background-color: #ffffff;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #9ca3af !important;
+  color: #94a3b8;
 }
