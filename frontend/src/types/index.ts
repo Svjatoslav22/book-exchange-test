@@ -50,3 +50,9 @@ export interface ExchangeResponse {
   message: string;
   previewUrl?: string | null;
 }
+
+export interface AdminUser extends User {
+  _count: {
+    books: number;
+  };
+}
