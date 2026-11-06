@@ -45,3 +45,8 @@ export interface ApiErrorResponse {
   message: string;
   errors?: { field: string; message: string }[];
 }
+
+export interface ExchangeResponse {
+  message: string;
+  previewUrl?: string | null;
+}
