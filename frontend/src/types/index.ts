@@ -8,14 +8,32 @@ export interface User {
   createdAt: string;
 }
 
+export interface BookOwner {
+  id: string;
+  name: string;
+}
+
 export interface Book {
   id: string;
   title: string;
   author: string;
   photoUrl: string | null;
   ownerId: string;
+  owner?: BookOwner;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface BooksResponse {
+  books: Book[];
+  pagination: Pagination;
 }
 
 export interface AuthResponse {
