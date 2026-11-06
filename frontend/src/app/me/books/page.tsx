@@ -20,7 +20,8 @@ export default function MyBooksPage() {
   const [listError, setListError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
@@ -65,10 +66,25 @@ export default function MyBooksPage() {
     fetchBooks();
   }, [isAuthLoading, user, router, fetchBooks]);
 
-  const closeAddModal = () => {
-    setIsAddModalOpen(false);
+  const openAddModal = () => {
+    setEditingBook(null);
     setFormError(null);
-    reset();
+    reset({ title: '', author: '' });
+    setIsFormModalOpen(true);
+  };
+
+  const openEditModal = (book: Book) => {
+    setEditingBook(book);
+    setFormError(null);
+    reset({ title: book.title, author: book.author });
+    setIsFormModalOpen(true);
+  };
+
+  const closeFormModal = () => {
+    setIsFormModalOpen(false);
+    setEditingBook(null);
+    setFormError(null);
+    reset({ title: '', author: '' });
   };
 
   const onSubmit = async (values: BookFormValues) => {
@@ -83,8 +99,12 @@ export default function MyBooksPage() {
     }
 
     try {
-      await api.post('/me/books', formData);
-      closeAddModal();
+      if (editingBook) {
+        await api.put(`/me/books/${editingBook.id}`, formData);
+      } else {
+        await api.post('/me/books', formData);
+      }
+      closeFormModal();
       await fetchBooks();
     } catch (error) {
       setFormError(getErrorMessage(error));
@@ -124,7 +144,7 @@ export default function MyBooksPage() {
 
         <button
           type="button"
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={openAddModal}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-burgundy px-5 py-2.5 font-medium text-white shadow-md transition-all hover:bg-burgundy-hover"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,7 +197,7 @@ export default function MyBooksPage() {
           </p>
           <button
             type="button"
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={openAddModal}
             className="inline-flex items-center gap-2 rounded-lg bg-burgundy px-5 py-2.5 font-medium text-white transition-all hover:bg-burgundy-hover"
           >
             Додати першу книгу
@@ -234,12 +254,26 @@ export default function MyBooksPage() {
                   <p className="mb-4 text-sm text-slate-500">{book.author}</p>
 
                   <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3">
-                    <Link
-                      href={`/books/${book.id}`}
-                      className="text-sm font-medium text-slate-500 transition-colors hover:text-burgundy"
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(book)}
+                      className="flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-slate-800"
                     >
-                      Детальніше →
-                    </Link>
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                      </svg>
+                      Редагувати
+                    </button>
                     <button
                       type="button"
                       onClick={() => setBookToDelete(book)}
@@ -268,20 +302,22 @@ export default function MyBooksPage() {
         </div>
       )}
 
-      {/* Modal: Add Book */}
-      {isAddModalOpen && (
+      {/* Modal: Add / Edit Book */}
+      {isFormModalOpen && (
         <div className="fixed inset-0 z-50">
           <div
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-            onClick={closeAddModal}
+            onClick={closeFormModal}
           />
           <div className="pointer-events-none flex min-h-screen items-center justify-center px-4 py-8">
             <div className="pointer-events-auto relative flex w-full max-w-lg flex-col rounded-2xl bg-white shadow-2xl">
               <div className="flex items-center justify-between border-b border-slate-100 p-6">
-                <h3 className="text-xl font-bold text-slate-900">Додати книгу</h3>
+                <h3 className="text-xl font-bold text-slate-900">
+                  {editingBook ? 'Редагувати книгу' : 'Додати книгу'}
+                </h3>
                 <button
                   type="button"
-                  onClick={closeAddModal}
+                  onClick={closeFormModal}
                   className="text-slate-400 transition-colors hover:text-slate-600"
                 >
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -316,7 +352,10 @@ export default function MyBooksPage() {
                         />
                       </svg>
                       <span className="text-sm font-medium text-slate-600">
-                        {selectedFileName || 'Завантажити обкладинку'}
+                        {selectedFileName ||
+                          (editingBook
+                            ? 'Завантажити нову обкладинку (необовʼязково)'
+                            : 'Завантажити обкладинку')}
                       </span>
                       <span className="mt-1 text-xs text-slate-400">
                         PNG, JPG, WebP до 5MB
@@ -388,7 +427,7 @@ export default function MyBooksPage() {
                 <div className="flex justify-end gap-3 rounded-b-2xl border-t border-slate-100 bg-slate-50/50 p-6">
                   <button
                     type="button"
-                    onClick={closeAddModal}
+                    onClick={closeFormModal}
                     className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900"
                   >
                     Скасувати
