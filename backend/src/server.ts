@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
 import { errorHandler } from './middlewares/errorHandler';
+import authRoutes from './routes/auth.routes';
 
 dotenv.config();
 
@@ -24,6 +25,8 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.get('/api/health', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'ok', message: 'Book Exchange API is running' });
 });
+
+app.use('/api/auth', authRoutes);
 
 app.use(errorHandler);
 
