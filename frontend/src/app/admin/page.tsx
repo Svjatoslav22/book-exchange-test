@@ -59,62 +59,113 @@ export default function AdminPage() {
   }, [isAuthLoading, user, router]);
 
   if (isAuthLoading || !user || user.role !== 'ADMIN') {
-    return <p className="text-sm text-gray-500">Завантаження...</p>;
+    return <p className="text-sm text-slate-500">Завантаження...</p>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Адмін-панель: Користувачі</h1>
-        <span className="text-sm text-gray-600">Всього: {users.length}</span>
+    <div>
+      <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            Панель адміністратора
+          </h1>
+          <p className="mt-1 text-slate-500">
+            Управління користувачами платформи
+          </p>
+        </div>
       </div>
 
       {error && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </p>
       )}
 
-      {isLoading ? (
-        <p className="text-sm text-gray-500">Завантаження...</p>
-      ) : users.length === 0 ? (
-        <p className="text-sm text-gray-500">Користувачів не знайдено.</p>
-      ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 font-semibold text-gray-900">Імʼя</th>
-                <th className="px-4 py-3 font-semibold text-gray-900">Email</th>
-                <th className="px-4 py-3 font-semibold text-gray-900">Роль</th>
-                <th className="px-4 py-3 font-semibold text-gray-900">Книг</th>
-                <th className="px-4 py-3 font-semibold text-gray-900">Дата реєстрації</th>
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-4">Користувач</th>
+                <th className="px-6 py-4">Роль</th>
+                <th className="px-6 py-4">Книги</th>
+                <th className="px-6 py-4">Реєстрація</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
-              {users.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{item.name}</td>
-                  <td className="px-4 py-3 text-gray-700">{item.email}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${
-                        item.role === 'ADMIN'
-                          ? 'bg-gray-900 text-white'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {item.role}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-700">{item._count.books}</td>
-                  <td className="px-4 py-3 text-gray-500">
-                    {new Date(item.createdAt).toLocaleDateString('uk-UA')}
+            <tbody className="divide-y divide-slate-100">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-500">
+                    Завантаження...
                   </td>
                 </tr>
-              ))}
+              ) : users.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-500">
+                    Користувачів не знайдено.
+                  </td>
+                </tr>
+              ) : (
+                users.map((item) => {
+                  const initial = item.name ? item.name.charAt(0).toUpperCase() : 'U';
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className="transition-colors hover:bg-slate-50/50"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
+                              item.role === 'ADMIN' ? 'bg-burgundy' : 'bg-slate-800'
+                            }`}
+                          >
+                            {initial}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-900">
+                              {item.name}
+                            </p>
+                            <p className="text-xs text-slate-500">{item.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {item.role === 'ADMIN' ? (
+                          <span className="rounded-full border border-burgundy/20 bg-burgundy/10 px-2.5 py-1 text-xs font-bold text-burgundy">
+                            Admin
+                          </span>
+                        ) : (
+                          <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
+                            User
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium text-slate-700">
+                        {item._count.books}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-500">
+                        {new Date(item.createdAt).toLocaleDateString('uk-UA', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
-      )}
+
+        <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <span className="text-sm text-slate-500">
+            Всього користувачів: {users.length}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
